@@ -4,6 +4,7 @@
 -- | OpenGL with some extensions for color
 module Wrappers.OpenGL ( module OGL
                        , ColorDef (..)
+                       , gray
                        , drawColored
                        , GLColor (..)
                        ) where
@@ -17,23 +18,24 @@ import Graphics.Rendering.OpenGL as OGL
 
 -- | Class of types which can be used to define colors
 class ColorDef c where
-    red, blue, lime, forest, green, orange, yellow, cyan, pink, purple, magenta, white, black, transparent :: c
+    red, blue, lime, forest, green, orange, yellow, cyan, pink, purple, magenta, white, black, grey, transparent :: c
     green = forest
     magenta = pink
 
 instance ColorDef (Color4 GLdouble) where
-    red         = Color4 1   0   0 0
-    blue        = Color4 0   0   1 0
-    lime        = Color4 0   1   0 0
-    forest      = Color4 0   0.5 0 0
-    orange      = Color4 1   0.5 0 0
-    yellow      = Color4 1   1   0 0
-    cyan        = Color4 0   1   1 0
-    pink        = Color4 1   0   1 0
-    purple      = Color4 0.5 0   1 0
-    white       = Color4 1   1   1 0
-    black       = Color4 0   0   0 0
-    transparent = Color4 0   0   0 1
+    red         = Color4 1   0   0   0
+    blue        = Color4 0   0   1   0
+    lime        = Color4 0   1   0   0
+    forest      = Color4 0   0.5 0   0
+    orange      = Color4 1   0.5 0   0
+    yellow      = Color4 1   1   0   0
+    cyan        = Color4 0   1   1   0
+    pink        = Color4 1   0   1   0
+    purple      = Color4 0.5 0   1   0
+    white       = Color4 1   1   1   0
+    black       = Color4 0   0   0   0
+    grey        = Color4 0.5 0.5 0.5 0
+    transparent = Color4 0   0   0   1
 
 instance ColorDef (GLubyte, GLubyte, GLubyte, GLubyte) where
     red         = (255, 0  , 0  , 0  )
@@ -47,7 +49,11 @@ instance ColorDef (GLubyte, GLubyte, GLubyte, GLubyte) where
     purple      = (127, 0  , 255, 0  )
     white       = (255, 255, 255, 0  )
     black       = (0  , 0  , 0  , 0  )
+    grey        = (127, 127, 127, 127)
     transparent = (0  , 0  , 0  , 255)
+
+gray :: ColorDef a => a
+gray = grey
 
 -- | Set the OpenGL color, then call `vertex` on each vertex
 drawColored :: (Color c, Vertex v) => c -> [v] -> IO ()
