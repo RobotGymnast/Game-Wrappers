@@ -1,17 +1,17 @@
 #!/bin/bash
 
-dir=/tmp/testbuild/`pwd | sed "s/.*\///"`
-echo Creating temporary build environment in $dir
-
-if [ -d $dir/dist ]; then
-    rm -rf $dir/.git &&
-    cp -r --preserve=timestamps .git .gitignore *.cabal src "test" scripts $dir/
+dir=/tmp/testbuild/`pwd | sed "s/.*\///g"`
+if [ -d "$dir" ]; then
+    rm -rf "$dir"/.git
+    echo Re-using build environment in "$dir"
 else
-    mkdir -p $dir &&
-    cp -r --preserve=timestamps * .* $dir/
+    rm -rf "$dir" &&
+    echo Creating temporary build environment in "$dir"
 fi &&
 
-cd $dir &&
+mkdir -p "$dir"
+cp -r --preserve=timestamps . "$dir" &&
+cd "$dir" &&
 rm -f .git/hooks/pre-commit &&
 git commit -m "Temp" > /dev/null &&
 git reset --hard HEAD > /dev/null &&
@@ -22,4 +22,5 @@ echo &&
 scripts/test.sh &&
 echo &&
 scripts/linecheck.sh &&
-echo
+echo &&
+rm -rf "$dir"
