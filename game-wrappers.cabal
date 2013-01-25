@@ -21,7 +21,8 @@ library
                     GLFW-b,
                     stm,
                     tuple,
-                    Step ==0.7,
+                    Step >= 0.6,
+                    Step < 1.0,
                     QuickCheck >= 2,
                     base >= 4.5,
                     base < 5.0
@@ -43,7 +44,7 @@ test-suite Tests
                     test-framework-hunit,
                     test-framework-th,
                     test-framework,
-                    Step ==0.7,
+                    Step,
                     Cabal,
                     base >= 4.5,
                     base < 5.0
