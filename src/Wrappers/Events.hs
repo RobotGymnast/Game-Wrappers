@@ -16,7 +16,6 @@ import Prelewd
 
 import IO
 
-import Data.Either
 import Text.Show
 
 import Storage.List
