@@ -1,5 +1,5 @@
 Name:                Game-Wrappers
-Version:             0.1
+Version:             0.2
 Description:         Collection of wrappers for use in game dev
 Category:            Game Engine
 License:             BSD3
@@ -21,7 +21,7 @@ library
                     GLFW-b,
                     stm,
                     tuple,
-                    Step >= 0.6,
+                    Step >= 0.10,
                     Step < 1.0,
                     QuickCheck >= 2,
                     base >= 4.5,
@@ -46,5 +46,4 @@ test-suite Tests
                     test-framework,
                     Step,
                     Cabal,
-                    base >= 4.5,
-                    base < 5.0
+                    base
