@@ -2,6 +2,7 @@
 module Wrappers.STM ( module T
                     , module TC
                     , module TA
+                    , module TQ
                     , atomically
                     , modifyTVar
                     , modifyTVar'
@@ -13,6 +14,7 @@ import qualified Control.Monad.STM as STM
 import Control.Concurrent.STM.TVar as T hiding (modifyTVar, modifyTVar')
 import Control.Concurrent.STM.TChan as TC
 import Control.Concurrent.STM.TArray as TA
+import Control.Concurrent.STM.TQueue as TQ
 
 import IO
 import Prelewd
