@@ -8,7 +8,7 @@ module Wrappers.Events ( Event (..)
                        , GLFW.MouseButton (..)
                        , Size (..)
                        , ButtonState (..)
-                       , setUpEvents
+                       , initEvents
                        , popEvent
                        ) where
 
@@ -56,8 +56,8 @@ addEvent = atomically . writeTQueue events
 
 -- | Set up a queued event system
 -- `GLFW.initialize` must have been called
-setUpEvents :: IO ()
-setUpEvents = filter id (io GLFW.initialize) >> io setCallbacks
+initEvents :: IO ()
+initEvents = filter id (io GLFW.initialize) >> io setCallbacks
     where
         toSize = on Size fromIntegral
         toPos = on Position fromIntegral
