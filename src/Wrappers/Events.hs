@@ -10,12 +10,14 @@ module Wrappers.Events ( Event (..)
                        , ButtonState (..)
                        , initEvents
                        , popEvent
+                       , events
                        ) where
 
 import Prelewd
 
 import IO
 
+import Control.Stream
 import Text.Show
 import System.IO.Unsafe
 
@@ -32,7 +34,7 @@ btnState :: Bool -> ButtonState
 btnState True = Press
 btnState False = Release
 
--- | Event data structure dictates what events we can accept
+-- | Event data structure dictates what eventQ we can accept
 data Event = ButtonEvent Button ButtonState
            | MouseMoveEvent Position
            | ResizeEvent Size
@@ -45,14 +47,14 @@ data Button = KeyButton GLFW.Key
             | MouseButton GLFW.MouseButton
     deriving (Eq, Show)
 
-events :: TQueue Event
-events = unsafePerformIO newTQueueIO
+eventQ :: TQueue Event
+eventQ = unsafePerformIO newTQueueIO
 
-{-# NOINLINE events #-}
+{-# NOINLINE eventQ #-}
 
 -- | Push an event into the shared variable.
 addEvent :: Event -> IO ()
-addEvent = atomically . writeTQueue events
+addEvent = atomically . writeTQueue eventQ
 
 -- | Set up a queued event system
 -- `GLFW.initialize` must have been called
@@ -72,4 +74,10 @@ initEvents = filter id (io GLFW.initialize) >> io setCallbacks
             ]
 
 popEvent :: IO (Maybe Event)
-popEvent = atomically $ tryReadTQueue events
+popEvent = atomically $ tryReadTQueue eventQ
+
+newEvents :: IO [Event]
+newEvents = popEvent >>= maybe (return []) (\x -> (x:) <$> newEvents)
+
+events :: Stream IO () [Event]
+events = lift $ arr $ \_-> newEvents
