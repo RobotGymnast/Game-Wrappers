@@ -42,10 +42,11 @@ data Event = ButtonEvent Button ButtonState
            | CloseEvent
     deriving (Eq, Show)
 
--- | Buttons can be keys or mouse presses
+-- | Buttons can be keys or mouse presses.
+-- Ordering is arbitrary, but deterministic
 data Button = KeyButton GLFW.Key
             | MouseButton GLFW.MouseButton
-    deriving (Eq, Show)
+    deriving (Eq, Ord, Show)
 
 eventQ :: TQueue Event
 eventQ = unsafePerformIO newTQueueIO
