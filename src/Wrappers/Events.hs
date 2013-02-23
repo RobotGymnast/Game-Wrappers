@@ -16,13 +16,13 @@ module Wrappers.Events ( Event (..)
 import Prelewd
 
 import IO
+import STM
 
 import Control.Stream
 import Text.Show
 import System.IO.Unsafe
 
 import Wrappers.OpenGL
-import Wrappers.STM
 
 import qualified Graphics.UI.GLFW as GLFW
 

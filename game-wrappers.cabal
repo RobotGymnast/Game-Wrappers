@@ -11,7 +11,7 @@ Cabal-Version:       >= 1.9.2
 library
     hs-source-dirs:    src/
     ghc-options:       -Wall -Werror -threaded -rtsopts=all -fllvm
-    exposed-modules:   Wrappers.OpenGL Wrappers.GLFW Wrappers.Events Wrappers.STM
+    exposed-modules:   Wrappers.OpenGL Wrappers.GLFW Wrappers.Events
     extensions:        FlexibleInstances, TupleSections, TemplateHaskell, GeneralizedNewtypeDeriving, NoImplicitPrelude,
                        BangPatterns, ExistentialQuantification, MultiParamTypeClasses, FlexibleContexts,
                        UndecidableInstances, ScopedTypeVariables, IncoherentInstances
@@ -21,7 +21,7 @@ library
                     GLFW-b,
                     stm,
                     tuple,
-                    Summit >= 0.10,
+                    Summit >= 0.11,
                     Summit < 1.0,
                     QuickCheck >= 2,
                     base >= 4.5,
