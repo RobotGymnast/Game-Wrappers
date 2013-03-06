@@ -28,7 +28,7 @@ import qualified Graphics.UI.GLFW as GLFW
 
 -- | The state of an input device button
 data ButtonState = Press | Release
-    deriving (Show, Eq)
+    deriving (Show, Eq, Ord)
 
 btnState :: Bool -> ButtonState
 btnState True = Press
@@ -40,7 +40,7 @@ data Event = ButtonEvent Button ButtonState
            | ResizeEvent Size
            | RefreshEvent
            | CloseEvent
-    deriving (Eq, Show)
+    deriving (Eq, Show, Ord)
 
 -- | Buttons can be keys or mouse presses.
 -- Ordering is arbitrary, but deterministic
