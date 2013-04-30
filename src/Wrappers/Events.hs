@@ -78,7 +78,7 @@ popEvent :: IO (Maybe Event)
 popEvent = atomically $ tryReadTQueue eventQ
 
 newEvents :: IO [Event]
-newEvents = popEvent >>= maybe (return []) (\x -> (x:) <$> newEvents)
+newEvents = popEvent >>= ((<&> (\x -> (x:) <$> newEvents)) >>> (<?> return []))
 
 events :: Stream IO () [Event]
 events = lift $ arr $ \_-> newEvents
