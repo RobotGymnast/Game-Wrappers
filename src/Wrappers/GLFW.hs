@@ -35,9 +35,8 @@ module Wrappers.GLFW ( DisplayOptions (..)
                      , runGLFW
                      ) where
 
-import Prelewd
-
-import IO
+import Summit.Prelewd
+import Summit.IO
 
 import Graphics.UI.GLFW
 

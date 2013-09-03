@@ -1,8 +1,7 @@
 module Main (main) where
 
-import IO
-
-import Test.Framework
+import Summit.IO
+import Summit.Test
 
 main :: SystemIO ()
 main = defaultMain

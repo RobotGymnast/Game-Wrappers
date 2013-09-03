@@ -13,12 +13,11 @@ module Wrappers.Events ( Event (..)
                        , events
                        ) where
 
-import Prelewd
+import Summit.Control.Stream
+import Summit.IO
+import Summit.Prelewd
+import Summit.STM
 
-import IO
-import STM
-
-import Control.Stream
 import Text.Show
 import System.IO.Unsafe
 

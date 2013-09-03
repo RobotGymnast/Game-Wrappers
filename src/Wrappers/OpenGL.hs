@@ -11,8 +11,8 @@ module Wrappers.OpenGL ( module OGL
 
 import Data.Tuple.Curry
 
-import IO
-import Prelewd
+import Summit.IO
+import Summit.Prelewd
 
 import Graphics.Rendering.OpenGL as OGL
 
