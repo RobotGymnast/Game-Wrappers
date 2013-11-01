@@ -18,7 +18,7 @@ library
 
     build-depends: 
                     OpenGL,
-                    GLFW-b,
+                    GLFW-b < 1.0.0,
                     stm,
                     tuple,
                     Summit >= 0.15,
