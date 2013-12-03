@@ -1,20 +1,25 @@
-Name:                Game-Wrappers
+Name:                game-wrappers
 Version:             0.2
-Description:         Collection of wrappers for use in game dev
+Synopsis:            Collection of library wrappers intended for use in game dev
+Description:         This library is a wrapper for several other libraries,
+                     with design decisions made with intent to favor game developers.
+
+                     Feedback, help, pull requests, etc. are welcome!
 Category:            Game Engine
-License:             BSD3
+License:             MIT
 Author:              Ben Foppa
+Stability:           Experimental; no guarantees.
 Maintainer:          benjamin.foppa@gmail.com
 Build-Type:          Simple
 Cabal-Version:       >= 1.9.2
 
 library
     hs-source-dirs:    src/
-    ghc-options:       -Wall -Werror -threaded -rtsopts=all -fllvm
-    exposed-modules:   Wrappers.OpenGL Wrappers.GLFW Wrappers.Events
-    extensions:        FlexibleInstances, TupleSections, TemplateHaskell, GeneralizedNewtypeDeriving, NoImplicitPrelude,
-                       BangPatterns, ExistentialQuantification, MultiParamTypeClasses, FlexibleContexts,
-                       UndecidableInstances, ScopedTypeVariables, IncoherentInstances
+    ghc-options:       -Wall -Werror -threaded -rtsopts=all
+    exposed-modules:
+                      Wrappers.OpenGL
+                      Wrappers.GLFW
+                      Wrappers.Events
 
     build-depends: 
                     OpenGL,
@@ -27,23 +32,6 @@ library
                     base >= 4.5,
                     base < 5.0
 
-test-suite Tests
-    type:           exitcode-stdio-1.0
-    hs-source-dirs: test/
-                    src/
-    main-is:        Test.hs
-    ghc-options:    -Wall -Werror
-    extensions:     FlexibleInstances, TupleSections, TemplateHaskell, GeneralizedNewtypeDeriving, NoImplicitPrelude,
-                    BangPatterns, ExistentialQuantification, MultiParamTypeClasses, FlexibleContexts,
-                    UndecidableInstances, ScopedTypeVariables, IncoherentInstances
-
-    build-depends: 
-                    QuickCheck >= 2,
-                    HUnit,
-                    test-framework-quickcheck2,
-                    test-framework-hunit,
-                    test-framework-th,
-                    test-framework,
-                    Summit,
-                    Cabal,
-                    base
+source-repository head
+  type: git
+  location: https://github.com/RobotGymnast/Game-Wrappers

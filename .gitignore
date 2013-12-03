@@ -2,6 +2,7 @@
 *~
 *.ignore
 *.ignore.*
+cabal.sandbox.config
 
+.cabal-sandbox
 dist
-docs
