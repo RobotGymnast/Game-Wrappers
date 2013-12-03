@@ -1,61 +1,134 @@
 {-# LANGUAGE NoImplicitPrelude
            #-}
-module Wrappers.GLFW ( DisplayOptions (..)
-                     , DisplayMode (..)
-                     , VideoMode (..)
-                     , WindowValue (..)
-                     , defaultDisplayOptions
-                     , getVideoMode
-                     , getVideoModes
-                     , openWindow
-                     , closeWindow
-                     , setWindowTitle
-                     , setWindowDimensions
-                     , iconifyWindow
-                     , restoreWindow
+module Wrappers.GLFW ( VideoMode (..)
+                     , MonitorState (..)
+                     , FocusState (..)
+                     , IconifyState (..)
+                     , KeyState (..)
+                     , MouseButtonState (..)
+                     , ModifierKeys (..)
+                     , Key (..)
+                     , MouseButton (..)
+                     , Monitor
+                     , Window
+                     , closeCallback
+                     , focusCallback
+                     , posCallback
+                     , iconifyCallback
+                     , resizeCallback
+                     , refreshCallback
+                     , keyCallback
+                     , mouseButtonCallback
+                     , cursorPosCallback
+                     , cursorEnterCallback
+                     , videoMode
+                     , videoModes
+                     , monitors
+                     , primaryMonitor
+                     , shouldClose
                      , swapBuffers
-                     , setWindowBufferSwapInterval
-                     , windowIsOpen
-                     , windowIsActive
-                     , windowIsIconified
-                     , windowIsResizable
-                     , windowIsHardwareAccelerated
-                     , windowSupportsStereoRendering
-                     , getWindowRefreshRate
-                     , getWindowDimensions
-                     , getWindowValue
-                     , getTime
-                     , setTime
-                     , resetTime
-                     , sleep
-                     , getGlfwVersion
-                     , getGlVersion
+                     , iconified
+                     , time
+                     , windowPos
+                     , windowTitle
                      , initGLFW
-                     , closeGLFW
                      , runGLFW
+                     , terminate
                      ) where
 
-import Summit.Prelewd
-import Summit.IO
+import Prelewd
+
+import Data.StateVar
+import Data.Tuple (uncurry)
+import System.IO
 
 import Graphics.UI.GLFW
 
+setWithoutWindow :: (Window -> Maybe (Window -> r) -> IO ()) -> Window -> SettableStateVar (Maybe r)
+setWithoutWindow f w = makeSettableStateVar $ \m -> f w $ m <&> \act _-> act
+
+closeCallback :: Window -> SettableStateVar (Maybe (IO ()))
+closeCallback = setWithoutWindow setWindowCloseCallback
+
+focusCallback :: Window -> SettableStateVar (Maybe (FocusState -> IO ()))
+focusCallback = setWithoutWindow setWindowFocusCallback
+
+posCallback :: Window -> SettableStateVar (Maybe (Int -> Int -> IO ()))
+posCallback = setWithoutWindow setWindowPosCallback
+
+iconifyCallback :: Window -> SettableStateVar (Maybe (IconifyState -> IO ()))
+iconifyCallback = setWithoutWindow setWindowIconifyCallback
+
+resizeCallback :: Window -> SettableStateVar (Maybe (Int -> Int -> IO ()))
+resizeCallback = setWithoutWindow setWindowSizeCallback
+
+refreshCallback :: Window -> SettableStateVar (Maybe (IO ()))
+refreshCallback = setWithoutWindow setWindowRefreshCallback
+
+keyCallback :: Window -> SettableStateVar (Maybe (Key -> Int -> KeyState -> ModifierKeys -> IO ()))
+keyCallback = setWithoutWindow setKeyCallback
+
+mouseButtonCallback :: Window -> SettableStateVar (Maybe (MouseButton -> MouseButtonState -> ModifierKeys -> IO ()))
+mouseButtonCallback = setWithoutWindow setMouseButtonCallback
+
+cursorPosCallback :: Window -> SettableStateVar (Maybe (Double -> Double -> IO ()))
+cursorPosCallback = setWithoutWindow setCursorPosCallback
+
+cursorEnterCallback :: Window -> SettableStateVar (Maybe (CursorState -> IO ()))
+cursorEnterCallback = setWithoutWindow setCursorEnterCallback
+
+videoMode :: Monitor -> GettableStateVar (Maybe VideoMode)
+videoMode = makeGettableStateVar . getVideoMode
+
+videoModes :: Monitor -> GettableStateVar (Maybe [VideoMode])
+videoModes = makeGettableStateVar . getVideoModes
+
+monitors :: GettableStateVar (Maybe [Monitor])
+monitors = makeGettableStateVar getMonitors
+
+primaryMonitor :: GettableStateVar (Maybe Monitor)
+primaryMonitor = makeGettableStateVar getPrimaryMonitor
+
+shouldClose :: Window -> StateVar Bool
+shouldClose = makeStateVar <$> windowShouldClose <*> setWindowShouldClose
+
+time :: StateVar Double
+time = makeStateVar (getTime <&> (<?> 0)) setTime
+
+iconified :: Window -> StateVar IconifyState
+iconified w = makeStateVar (getWindowIconified w)
+            $ \s -> case s of
+                IconifyState'Iconified -> restoreWindow w
+                IconifyState'NotIconified -> iconifyWindow w
+
+windowPos :: Window -> StateVar (Int, Int)
+windowPos w = makeStateVar (getWindowPos w) $ uncurry $ setWindowPos w
+
+windowTitle :: Window -> SettableStateVar String
+windowTitle = makeSettableStateVar . setWindowTitle
+
 -- | Run the action within a GLFW-initialized state, and close it afterward
-runGLFW :: Integral a => DisplayOptions -> (a, a) -> Text -> IO b -> IO b
-runGLFW opts pos title body =  initGLFW opts pos title
-                            >> body
-                            <* closeGLFW
+runGLFW :: Integral a
+        => String         -- ^ Window title
+        -> Maybe Monitor  -- ^ Just Monitor for fullscreen; Nothing for windowed.
+        -> (a, a)         -- ^ Window position
+        -> (a, a)         -- ^ Window size
+        -> IO b           -- ^ GLFW action
+        -> IO b
+runGLFW title fsmon pos dims body =  initGLFW title fsmon pos dims
+                                  >> body
+                                  <* terminate
 
 -- | Initialize GLFW. This should be run before most other GLFW commands.
-initGLFW :: Integral a => DisplayOptions -> (a, a) -> Text -> IO ()
-initGLFW opts (x, y) title = io $ do
-        True <- initialize
-        True <- openWindow opts
+initGLFW :: Integral a
+         => String          -- ^ Window title
+         -> Maybe Monitor   -- ^ Just Monitor for fullscreen; Nothing for windowed.
+         -> (a, a)          -- ^ Window position
+         -> (a, a)          -- ^ Window size
+         -> IO ()
+initGLFW title fsmon (x, y) (w, h) = do
+        True <- init
+        Just wnd <- createWindow (fromIntegral w) (fromIntegral h) title fsmon Nothing
 
-        (setWindowPosition `on` fromIntegral) x y
-        setWindowTitle title
-
--- | Shutdown GLFW. Most other GLFW commands should not be run after this.
-closeGLFW :: IO ()
-closeGLFW = io $  closeWindow
-               >> terminate
+        windowPos wnd $= (fromIntegral x, fromIntegral y)
+        windowTitle wnd $= title

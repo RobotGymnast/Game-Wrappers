@@ -9,10 +9,11 @@ module Wrappers.OpenGL ( module OGL
                        , GLColor (..)
                        ) where
 
-import Data.Tuple.Curry
+import Prelewd
 
-import Summit.IO
-import Summit.Prelewd
+import System.IO
+
+import Data.Tuple.Curry
 
 import Graphics.Rendering.OpenGL as OGL
 
@@ -57,7 +58,7 @@ gray = grey
 
 -- | Set the OpenGL color, then call `vertex` on each vertex
 drawColored :: (Color c, Vertex v) => c -> [v] -> IO ()
-drawColored c vs = io (color c) >> io (traverse_ vertex vs)
+drawColored c vs = color c >> traverse_ vertex vs
  
 -- | Colors which can be used to color OpenGL's rendering
 class GLColor c where

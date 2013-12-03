@@ -3,38 +3,29 @@
            #-}
 -- | Abstract event wrapper
 module Wrappers.Events ( Event (..)
-                       , Button (..)
+                       , ButtonState (..)
                        , GLFW.Key (..)
                        , GLFW.MouseButton (..)
                        , Size (..)
-                       , ButtonState (..)
                        , initEvents
                        , popEvent
                        , events
                        ) where
 
-import Summit.Control.Stream
-import Summit.IO
-import Summit.Prelewd
-import Summit.STM
+import Prelewd
 
+import Data.StateVar
 import Text.Show
+import System.IO
 import System.IO.Unsafe
 
-import Wrappers.OpenGL
+import Control.Concurrent.STM
 
-import qualified Graphics.UI.GLFW as GLFW
-
--- | The state of an input device button
-data ButtonState = Press | Release
-    deriving (Show, Eq, Ord)
-
-btnState :: Bool -> ButtonState
-btnState True = Press
-btnState False = Release
+import Wrappers.OpenGL (Position (..), Size (..))
+import Wrappers.GLFW as GLFW
 
 -- | Event data structure dictates what eventQ we can accept
-data Event = ButtonEvent Button ButtonState
+data Event = ButtonEvent ButtonState ModifierKeys
            | MouseMoveEvent Position
            | ResizeEvent Size
            | RefreshEvent
@@ -43,8 +34,8 @@ data Event = ButtonEvent Button ButtonState
 
 -- | Buttons can be keys or mouse presses.
 -- Ordering is arbitrary, but deterministic
-data Button = KeyButton GLFW.Key
-            | MouseButton GLFW.MouseButton
+data ButtonState = KeyButton GLFW.Key GLFW.KeyState
+                 | MouseButton GLFW.MouseButton GLFW.MouseButtonState
     deriving (Eq, Ord, Show)
 
 eventQ :: TQueue Event
@@ -57,27 +48,29 @@ addEvent :: Event -> IO ()
 addEvent = atomically . writeTQueue eventQ
 
 -- | Set up a queued event system
--- `GLFW.initialize` must have been called
-initEvents :: IO ()
-initEvents = filter id (io GLFW.initialize) >> io setCallbacks
+-- `GLFW.init` must have been called
+initEvents :: GLFW.Window -> IO ()
+initEvents = setCallbacks
     where
-        toSize = on Size fromIntegral
-        toPos = on Position fromIntegral
+        toSize = Size `on` fromIntegral
+        toPos = Position `on` round
 
-        setCallbacks = sequence_
-            [ GLFW.setWindowCloseCallback $ True <$ (runIO $ addEvent CloseEvent)
-            , GLFW.setWindowSizeCallback $ runIO . addEvent . ResizeEvent <$$> toSize
-            , GLFW.setWindowRefreshCallback $ runIO (addEvent RefreshEvent)
-            , GLFW.setKeyCallback $ runIO . addEvent <$$> ButtonEvent . KeyButton <%> btnState
-            , GLFW.setMouseButtonCallback $ runIO . addEvent <$$> ButtonEvent . MouseButton <%> btnState
-            , GLFW.setMousePositionCallback $ runIO . addEvent . MouseMoveEvent <$$> toPos
+        setCallbacks w = sequence_
+            [ GLFW.closeCallback w $= Just (addEvent CloseEvent)
+            , GLFW.resizeCallback w $= Just (addEvent . ResizeEvent <$$> toSize)
+            , GLFW.refreshCallback w $= Just (addEvent RefreshEvent)
+            , GLFW.keyCallback w $= Just (\k _ s -> addEvent . ButtonEvent (KeyButton k s))
+            , GLFW.mouseButtonCallback w $= Just (\b s -> addEvent . ButtonEvent (MouseButton b s))
+            , GLFW.cursorPosCallback w $= Just (addEvent . MouseMoveEvent <$$> toPos)
             ]
 
 popEvent :: IO (Maybe Event)
 popEvent = atomically $ tryReadTQueue eventQ
 
-newEvents :: IO [Event]
-newEvents = popEvent >>= ((<&> (\x -> (x:) <$> newEvents)) >>> (<?> return []))
-
-events :: Stream IO () [Event]
-events = lift $ arr $ \_-> newEvents
+events :: IO [Event]
+events = justsM popEvent
+  where
+    justsM :: (Functor m, Monad m) => m (Maybe a) -> m [a]
+    justsM m = m
+           >>= maybe (return [])
+                     (\a -> (a:) <$> justsM m)
