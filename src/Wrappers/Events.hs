@@ -3,10 +3,13 @@
            #-}
 -- | Abstract event wrapper
 module Wrappers.Events ( Event (..)
-                       , ButtonState (..)
-                       , GLFW.Key (..)
-                       , GLFW.MouseButton (..)
+                       , Key (..)
+                       , KeyState (..)
+                       , MouseButton (..)
+                       , MouseButtonState (..)
                        , Size (..)
+                       , ModifierKeys (..)
+                       , noModifiers
                        , initEvents
                        , popEvent
                        , events
@@ -25,18 +28,16 @@ import Wrappers.OpenGL (Position (..), Size (..))
 import Wrappers.GLFW as GLFW
 
 -- | Event data structure dictates what eventQ we can accept
-data Event = ButtonEvent ButtonState ModifierKeys
+data Event = KeyEvent Key KeyState ModifierKeys
+           | MouseButtonEvent MouseButton MouseButtonState ModifierKeys
            | MouseMoveEvent Position
            | ResizeEvent Size
            | RefreshEvent
            | CloseEvent
     deriving (Eq, Show, Ord)
 
--- | Buttons can be keys or mouse presses.
--- Ordering is arbitrary, but deterministic
-data ButtonState = KeyButton GLFW.Key GLFW.KeyState
-                 | MouseButton GLFW.MouseButton GLFW.MouseButtonState
-    deriving (Eq, Ord, Show)
+noModifiers :: ModifierKeys
+noModifiers = ModifierKeys False False False False
 
 eventQ :: TQueue Event
 eventQ = unsafePerformIO newTQueueIO
@@ -59,8 +60,8 @@ initEvents = setCallbacks
             [ GLFW.closeCallback w $= Just (addEvent CloseEvent)
             , GLFW.resizeCallback w $= Just (addEvent . ResizeEvent <$$> toSize)
             , GLFW.refreshCallback w $= Just (addEvent RefreshEvent)
-            , GLFW.keyCallback w $= Just (\k _ s -> addEvent . ButtonEvent (KeyButton k s))
-            , GLFW.mouseButtonCallback w $= Just (\b s -> addEvent . ButtonEvent (MouseButton b s))
+            , GLFW.keyCallback w $= Just (\k _ s -> addEvent . KeyEvent k s)
+            , GLFW.mouseButtonCallback w $= Just (\b s -> addEvent . MouseButtonEvent b s)
             , GLFW.cursorPosCallback w $= Just (addEvent . MouseMoveEvent <$$> toPos)
             ]
 
