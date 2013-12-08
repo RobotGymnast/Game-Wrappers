@@ -109,15 +109,15 @@ windowTitle = makeSettableStateVar . setWindowTitle
 
 -- | Run the action within a GLFW-initialized state, and close it afterward
 runGLFW :: Integral a
-        => String         -- ^ Window title
-        -> Maybe Monitor  -- ^ Just Monitor for fullscreen; Nothing for windowed.
-        -> (a, a)         -- ^ Window position
-        -> (a, a)         -- ^ Window size
-        -> IO b           -- ^ GLFW action
+        => String           -- ^ Window title
+        -> Maybe Monitor    -- ^ Just Monitor for fullscreen; Nothing for windowed.
+        -> (a, a)           -- ^ Window position
+        -> (a, a)           -- ^ Window size
+        -> (Window -> IO b) -- ^ GLFW action
         -> IO b
-runGLFW title fsmon pos dims body =  initGLFW title fsmon pos dims
-                                  >> body
-                                  <* terminate
+runGLFW title fsmon pos dims body = do
+    w <- initGLFW title fsmon pos dims
+    body w <* terminate
 
 -- | Initialize GLFW. This should be run before most other GLFW commands.
 initGLFW :: Integral a
@@ -125,10 +125,11 @@ initGLFW :: Integral a
          -> Maybe Monitor   -- ^ Just Monitor for fullscreen; Nothing for windowed.
          -> (a, a)          -- ^ Window position
          -> (a, a)          -- ^ Window size
-         -> IO ()
+         -> IO Window
 initGLFW title fsmon (x, y) (w, h) = do
         True <- init
         Just wnd <- createWindow (fromIntegral w) (fromIntegral h) title fsmon Nothing
 
         windowPos wnd $= (fromIntegral x, fromIntegral y)
         windowTitle wnd $= title
+        return wnd

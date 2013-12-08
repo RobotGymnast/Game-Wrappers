@@ -1,5 +1,5 @@
 Name:                game-wrappers
-Version:             0.3.0
+Version:             0.3.1
 Synopsis:            Collection of library wrappers intended for use in game dev
 Description:         This library is a wrapper for several other libraries,
                      with design decisions made with intent to favor game developers.
