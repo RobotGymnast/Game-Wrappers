@@ -10,7 +10,7 @@ module Wrappers.Events ( Event (..)
                        , noModifiers
                        , initEvents
                        , popEvent
-                       , events
+                       , popEvents
                        ) where
 
 import Prelude ()
@@ -63,10 +63,8 @@ initEvents = setCallbacks
 popEvent :: IO (Maybe Event)
 popEvent = atomically $ tryReadTQueue eventQ
 
-events :: IO [Event]
-events = justsM popEvent
+popEvents :: IO [Event]
+popEvents = pollEvents >> untilNothing popEvent
   where
-    justsM :: (Functor m, Monad m) => m (Maybe a) -> m [a]
-    justsM m = m
-           >>= maybe (return [])
-                     (\a -> (a:) <$> justsM m)
+    untilNothing :: (Functor m, Monad m) => m (Maybe a) -> m [a]
+    untilNothing m = m >>= maybe (return []) (\a -> (a:) <$> untilNothing m)
