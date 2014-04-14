@@ -9,10 +9,9 @@ module Wrappers.OpenGL ( module OGL
                        , GLColor (..)
                        ) where
 
-import Prelewd
+import BasicPrelude
 
-import System.IO
-
+import Data.Foldable
 import Data.Tuple.Curry
 
 import Graphics.Rendering.OpenGL as OGL
@@ -66,7 +65,7 @@ class GLColor c where
     toGLColor :: c -> Color4 GLclampf
 
 instance GLColor (Color4 GLubyte) where
-    toGLColor c = realToFrac <$> c <&> (/ 255)
+    toGLColor c = (/ 255) . realToFrac <$> c
 
 instance GLColor (Color4 GLdouble) where
     toGLColor c = realToFrac <$> c

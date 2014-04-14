@@ -1,5 +1,3 @@
-{-# LANGUAGE NoImplicitPrelude
-           #-}
 module Wrappers.GLFW ( VideoMode (..)
                      , MonitorState (..)
                      , FocusState (..)
@@ -34,18 +32,18 @@ module Wrappers.GLFW ( VideoMode (..)
                      , initGLFW
                      , runGLFW
                      , terminate
+                     , pollEvents
                      ) where
 
-import Prelewd
+import Prelude ()
+import BasicPrelude
 
 import Data.StateVar
-import Data.Tuple (uncurry)
-import System.IO
 
-import Graphics.UI.GLFW
+import Graphics.UI.GLFW as GLFW
 
 setWithoutWindow :: (Window -> Maybe (Window -> r) -> IO ()) -> Window -> SettableStateVar (Maybe r)
-setWithoutWindow f w = makeSettableStateVar $ \m -> f w $ m <&> \act _-> act
+setWithoutWindow f w = makeSettableStateVar $ \m -> f w $ (\act _-> act) <$> m
 
 closeCallback :: Window -> SettableStateVar (Maybe (IO ()))
 closeCallback = setWithoutWindow setWindowCloseCallback
@@ -93,7 +91,7 @@ shouldClose :: Window -> StateVar Bool
 shouldClose = makeStateVar <$> windowShouldClose <*> setWindowShouldClose
 
 time :: StateVar Double
-time = makeStateVar (getTime <&> (<?> 0)) setTime
+time = makeStateVar (fromMaybe 0 <$> getTime) setTime
 
 iconified :: Window -> StateVar IconifyState
 iconified w = makeStateVar (getWindowIconified w)
@@ -108,16 +106,18 @@ windowTitle :: Window -> SettableStateVar String
 windowTitle = makeSettableStateVar . setWindowTitle
 
 -- | Run the action within a GLFW-initialized state, and close it afterward
-runGLFW :: Integral a
+runGLFW :: Integral i
         => String           -- ^ Window title
         -> Maybe Monitor    -- ^ Just Monitor for fullscreen; Nothing for windowed.
-        -> (a, a)           -- ^ Window position
-        -> (a, a)           -- ^ Window size
-        -> (Window -> IO b) -- ^ GLFW action
-        -> IO b
+        -> (i, i)           -- ^ Window position
+        -> (i, i)           -- ^ Window size
+        -> (Window -> IO a) -- ^ GLFW action
+        -> IO a
 runGLFW title fsmon pos dims body = do
     w <- initGLFW title fsmon pos dims
-    body w <* terminate
+    a <- body w
+    terminate
+    return a
 
 -- | Initialize GLFW. This should be run before most other GLFW commands.
 initGLFW :: Integral a
@@ -127,7 +127,7 @@ initGLFW :: Integral a
          -> (a, a)          -- ^ Window size
          -> IO Window
 initGLFW title fsmon (x, y) (w, h) = do
-        True <- init
+        True <- GLFW.init
         Just wnd <- createWindow (fromIntegral w) (fromIntegral h) title fsmon Nothing
 
         windowPos wnd $= (fromIntegral x, fromIntegral y)

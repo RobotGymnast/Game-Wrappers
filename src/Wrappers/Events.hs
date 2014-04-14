@@ -1,6 +1,4 @@
 {-# OPTIONS -fno-cse #-}
-{-# LANGUAGE NoImplicitPrelude
-           #-}
 -- | Abstract event wrapper
 module Wrappers.Events ( Event (..)
                        , Key (..)
@@ -15,14 +13,12 @@ module Wrappers.Events ( Event (..)
                        , events
                        ) where
 
-import Prelewd
-
-import Data.StateVar
-import Text.Show
-import System.IO
-import System.IO.Unsafe
+import Prelude ()
+import BasicPrelude
 
 import Control.Concurrent.STM
+import Data.StateVar
+import System.IO.Unsafe
 
 import Wrappers.OpenGL (Position (..), Size (..))
 import Wrappers.GLFW as GLFW
@@ -41,7 +37,6 @@ noModifiers = ModifierKeys False False False False
 
 eventQ :: TQueue Event
 eventQ = unsafePerformIO newTQueueIO
-
 {-# NOINLINE eventQ #-}
 
 -- | Push an event into the shared variable.
@@ -58,11 +53,11 @@ initEvents = setCallbacks
 
         setCallbacks w = sequence_
             [ GLFW.closeCallback w $= Just (addEvent CloseEvent)
-            , GLFW.resizeCallback w $= Just (addEvent . ResizeEvent <$$> toSize)
+            , GLFW.resizeCallback w $= Just (\x y -> addEvent $ ResizeEvent $ toSize x y)
             , GLFW.refreshCallback w $= Just (addEvent RefreshEvent)
             , GLFW.keyCallback w $= Just (\k _ s -> addEvent . KeyEvent k s)
             , GLFW.mouseButtonCallback w $= Just (\b s -> addEvent . MouseButtonEvent b s)
-            , GLFW.cursorPosCallback w $= Just (addEvent . MouseMoveEvent <$$> toPos)
+            , GLFW.cursorPosCallback w $= Just (\x y -> addEvent $ MouseMoveEvent $ toPos x y)
             ]
 
 popEvent :: IO (Maybe Event)

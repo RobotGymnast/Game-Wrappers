@@ -1,5 +1,5 @@
 Name:                game-wrappers
-Version:             0.3.1
+Version:             0.3.4
 Synopsis:            Collection of library wrappers intended for use in game dev
 Description:         This library is a wrapper for several other libraries,
                      with design decisions made with intent to favor game developers.
@@ -24,14 +24,14 @@ library
     build-depends: 
                     OpenGL,
                     GLFW-b == 1.4.*,
-                    stm,
+                    stm == 2.4.*,
                     tuple,
                     StateVar,
-                    prelewd == 0.16.*,
+                    basic-prelude == 0.3.8.*,
                     QuickCheck >= 2,
                     base >= 4.5,
                     base < 5.0
 
 source-repository head
   type: git
-  location: https://github.com/RobotGymnast/Game-Wrappers
+  location: https://github.com/RobotGymnast/game-wrappers
