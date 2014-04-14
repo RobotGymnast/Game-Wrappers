@@ -52,12 +52,12 @@ initEvents = setCallbacks
         toPos = Position `on` round
 
         setCallbacks w = sequence_
-            [ GLFW.closeCallback w $= Just (addEvent CloseEvent)
-            , GLFW.resizeCallback w $= Just (\x y -> addEvent $ ResizeEvent $ toSize x y)
-            , GLFW.refreshCallback w $= Just (addEvent RefreshEvent)
-            , GLFW.keyCallback w $= Just (\k _ s -> addEvent . KeyEvent k s)
-            , GLFW.mouseButtonCallback w $= Just (\b s -> addEvent . MouseButtonEvent b s)
-            , GLFW.cursorPosCallback w $= Just (\x y -> addEvent $ MouseMoveEvent $ toPos x y)
+            [ GLFW.closeCallback w $=! Just (addEvent CloseEvent)
+            , GLFW.resizeCallback w $=! Just (\x y -> addEvent $ ResizeEvent $ toSize x  y)
+            , GLFW.refreshCallback w $=! Just (addEvent RefreshEvent)
+            , GLFW.keyCallback w $=! Just (\k _ s -> addEvent . KeyEvent k s)
+            , GLFW.mouseButtonCallback w $=! Just (\b s -> addEvent . MouseButtonEvent b s)
+            , GLFW.cursorPosCallback w $=! Just (\x y -> addEvent $ MouseMoveEvent $ toPos x y)
             ]
 
 popEvent :: IO (Maybe Event)
