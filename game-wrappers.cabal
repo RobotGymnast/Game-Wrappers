@@ -1,5 +1,5 @@
 Name:                game-wrappers
-Version:             0.4.0
+Version:             0.5.0
 Synopsis:            Collection of library wrappers intended for use in game dev
 Description:         This library is a wrapper for several other libraries,
                      with design decisions made with intent to favor game developers.
@@ -27,10 +27,10 @@ library
                     stm == 2.4.*,
                     tuple,
                     StateVar,
-                    basic-prelude == 0.3.8.*,
+                    basic-prelude == 0.3.*,
                     QuickCheck >= 2,
                     base >= 4.5,
-                    base < 5.0
+                    base < 4.8
 
 source-repository head
   type: git

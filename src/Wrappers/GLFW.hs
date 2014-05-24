@@ -112,12 +112,15 @@ runGLFW :: Integral i
         -> (i, i)           -- ^ Window position
         -> (i, i)           -- ^ Window size
         -> (Window -> IO a) -- ^ GLFW action
-        -> IO a
+        -> IO (Maybe a)
 runGLFW title fsmon pos dims body = do
-    w <- initGLFW title fsmon pos dims
-    a <- body w
-    terminate
-    return a
+    mw <- initGLFW title fsmon pos dims
+    case mw of
+      Nothing -> return Nothing
+      Just w -> do
+        a <- body w
+        terminate
+        return $ Just a
 
 -- | Initialize GLFW. This should be run before most other GLFW commands.
 initGLFW :: Integral a
@@ -125,11 +128,13 @@ initGLFW :: Integral a
          -> Maybe Monitor   -- ^ Just Monitor for fullscreen; Nothing for windowed.
          -> (a, a)          -- ^ Window position
          -> (a, a)          -- ^ Window size
-         -> IO Window
+         -> IO (Maybe Window)
 initGLFW title fsmon (x, y) (w, h) = do
-        True <- GLFW.init
-        Just wnd <- createWindow (fromIntegral w) (fromIntegral h) title fsmon Nothing
-
-        windowPos wnd $= (fromIntegral x, fromIntegral y)
-        windowTitle wnd $= title
-        return wnd
+        success <- GLFW.init
+        mwnd <- createWindow (fromIntegral w) (fromIntegral h) title fsmon Nothing
+        case (success, mwnd) of
+          (True, Just wnd) -> do
+            windowPos wnd $= (fromIntegral x, fromIntegral y)
+            windowTitle wnd $= title
+            return $ Just wnd
+          _ -> return Nothing
