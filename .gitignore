@@ -2,6 +2,7 @@
 *~
 *.ignore
 *.ignore.*
+.travis.yml
 cabal.sandbox.config
 
 .cabal-sandbox
