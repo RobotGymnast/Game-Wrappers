@@ -1,6 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude
-           , FlexibleInstances
-           #-}
+{-# LANGUAGE FlexibleInstances #-}
 -- | OpenGL with some extensions for color
 module Wrappers.OpenGL ( module OGL
                        , ColorDef (..)
@@ -9,8 +7,7 @@ module Wrappers.OpenGL ( module OGL
                        , GLColor (..)
                        ) where
 
-import BasicPrelude
-
+import Control.Applicative
 import Data.Foldable
 import Data.Tuple.Curry
 

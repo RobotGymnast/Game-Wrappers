@@ -13,10 +13,9 @@ module Wrappers.Events ( Event (..)
                        , popEvents
                        ) where
 
-import Prelude ()
-import BasicPrelude
-
+import Control.Applicative
 import Control.Concurrent.STM
+import Data.Function
 import Data.StateVar
 import System.IO.Unsafe
 

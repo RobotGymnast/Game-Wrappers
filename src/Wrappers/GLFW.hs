@@ -35,9 +35,8 @@ module Wrappers.GLFW ( VideoMode (..)
                      , pollEvents
                      ) where
 
-import Prelude ()
-import BasicPrelude
-
+import Control.Applicative
+import Data.Maybe
 import Data.StateVar
 
 import Graphics.UI.GLFW as GLFW
